@@ -28,6 +28,7 @@ services:
       APP_ENV: local
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY:?Set APP_KEY in infra/.env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/.env}
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
@@ -42,7 +43,7 @@ services:
     command: >
       sh -c "
       if [ ! -f vendor/autoload.php ]; then composer install --no-interaction --prefer-dist; fi &&
-      php artisan serve --host=0.0.0.0 --port=8000
+      php artisan serve --host=0.0.0.0 --port=8000 --no-reload
       "
 
   app:

@@ -78,12 +78,14 @@ Requisitos: Docker Desktop con Compose y los seis repositorios clonados dentro d
 
    El comando de administrador es idempotente: un administrador existente no se duplica y un nombre ocupado por otro rol produce error.
 
-4. Comprueba el endpoint público:
+4. Comprueba los endpoints públicos:
 
    ```powershell
    Invoke-RestMethod http://localhost:8000/api/v1/health
    ```
 
-   Debe devolver `status: ok`. El endpoint de login se verificará cuando esté implementado y conectado en P4; la migración actual solo permite comprobar que el administrador se creó con un hash y rol correctos.
+   Health debe devolver `status: ok`. El login `POST http://localhost:8000/api/v1/auth/login` acepta `username` y `password` como JSON y devuelve un JWT Bearer con vigencia de ocho horas. Pruébalo con el administrador configurado localmente; no publiques las credenciales ni el token. P2 sigue parcial hasta probar el arranque desde un volumen PostgreSQL vacío.
 
 La base arranca sin tablas de negocio; estas aparecen al ejecutar las migraciones. Para detener los servicios sin borrar los datos, usa `docker compose down`. No uses `down -v` salvo que quieras eliminar deliberadamente el volumen de PostgreSQL.
+
+El servicio API ejecuta `php artisan serve --no-reload` para conservar las variables de entorno definidas por Compose incluso cuando existe un `.env` local.
