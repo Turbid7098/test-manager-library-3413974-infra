@@ -89,3 +89,5 @@ Requisitos: Docker Desktop con Compose y los seis repositorios clonados dentro d
 La base arranca sin tablas de negocio; estas aparecen al ejecutar las migraciones. Para detener los servicios sin borrar los datos, usa `docker compose down`. No uses `down -v` salvo que quieras eliminar deliberadamente el volumen de PostgreSQL.
 
 El servicio API ejecuta `php artisan serve --no-reload` para conservar las variables de entorno definidas por Compose incluso cuando existe un `.env` local.
+
+El frontend guarda sus dependencias Linux en el volumen `app-node-modules`, separado del `node_modules` del host. Al iniciar, ejecuta `npm ci` si Vite aún no está instalado en ese volumen; así funciona también cuando los repositorios se montan desde Windows.

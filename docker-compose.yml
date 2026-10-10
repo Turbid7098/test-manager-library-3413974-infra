@@ -51,15 +51,17 @@ services:
     working_dir: /app
     volumes:
       - ../test-manager-library-3413974-app-main:/app
+      - app-node-modules:/app/node_modules
     ports:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000/api/v1
     command: >
       sh -c "
-      if [ ! -d node_modules ]; then npm ci; fi &&
+      if [ ! -x node_modules/.bin/vite ]; then npm ci; fi &&
       npm run dev -- --host 0.0.0.0
       "
 
 volumes:
   db-data:
+  app-node-modules:
