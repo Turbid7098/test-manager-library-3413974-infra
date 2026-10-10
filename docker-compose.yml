@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16
+    container_name: library-db
+    environment:
+      POSTGRES_DB: library_db
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d library_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: php:8.3-cli
+    container_name: library-api
+    working_dir: /var/www/html
+    volumes:
+      - ../test-manager-library-3413974-api-main:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: library_db
+      DB_USERNAME: library_user
+      DB_PASSWORD: library_password
+      # Variables for initial admin
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: adminpassword
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+      apt-get update && apt-get install -y libpq-dev unzip &&
+      docker-php-ext-install pdo pdo_pgsql &&
+      php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  app:
+    image: node:22-alpine
+    container_name: library-app
+    working_dir: /app
+    volumes:
+      - ../test-manager-library-3413974-app-main:/app
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    command: >
+      sh -c "
+      npm install &&
+      npm run dev -- --host 0.0.0.0
+      "
+
+volumes:
+  db-data:
