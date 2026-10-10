@@ -29,6 +29,7 @@ services:
       APP_DEBUG: "false"
       APP_KEY: ${APP_KEY:?Set APP_KEY in infra/.env}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/.env}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
