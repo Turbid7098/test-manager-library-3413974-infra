@@ -49,3 +49,41 @@ antes de las 3:00 p. m.**: no se presenta nada que no esté en GitHub.
 | [`test-manager-library-3413974-page`](https://github.com/code-sena/test-manager-library-3413974-page) | Sitio público estático de presentación |
 | [`test-manager-library-3413974-infra`](https://github.com/code-sena/test-manager-library-3413974-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
 | [`test-manager-library-3413974-tool`](https://github.com/code-sena/test-manager-library-3413974-tool) | Utilidades: sembrador de datos de demostración |
+
+## Ejecución local
+
+Requisitos: Docker Desktop con Compose y los seis repositorios clonados dentro de una misma carpeta.
+
+1. Desde este directorio, crea la configuración local ignorada por Git y define valores propios para la base de datos y el administrador:
+
+   ```powershell
+   Copy-Item .env.example .env
+   notepad .env
+   ```
+
+   Reemplaza todos los valores `replace-with-...`; genera `APP_KEY` como `base64:` seguido de la codificación Base64 de 32 bytes aleatorios. No publiques `.env`, contraseñas, hashes ni tokens.
+
+2. Construye y levanta PostgreSQL, Laravel y Vite:
+
+   ```powershell
+   docker compose up --build -d
+   ```
+
+3. Espera el healthcheck de PostgreSQL y aplica el esquema propiedad de las migraciones Laravel:
+
+   ```powershell
+   docker compose exec api php artisan migrate --force
+   docker compose exec api php artisan app:create-admin
+   ```
+
+   El comando de administrador es idempotente: un administrador existente no se duplica y un nombre ocupado por otro rol produce error.
+
+4. Comprueba el endpoint público:
+
+   ```powershell
+   Invoke-RestMethod http://localhost:8000/api/v1/health
+   ```
+
+   Debe devolver `status: ok`. El endpoint de login se verificará cuando esté implementado y conectado en P4; la migración actual solo permite comprobar que el administrador se creó con un hash y rol correctos.
+
+La base arranca sin tablas de negocio; estas aparecen al ejecutar las migraciones. Para detener los servicios sin borrar los datos, usa `docker compose down`. No uses `down -v` salvo que quieras eliminar deliberadamente el volumen de PostgreSQL.
